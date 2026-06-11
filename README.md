@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мій мобільний додаток</title>
-    
+    <title>Play and Win!</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* Стилі: кольори автоматично беруться з теми Telegram користувача */
         body {
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #1a1a1a);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -21,79 +19,114 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-        }
-
-        .container {
             text-align: center;
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+        /* Стильний блок з балами */
+        .score-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #score {
+            color: #f39c12;
+            font-size: 28px;
         }
 
         p {
             font-size: 16px;
             opacity: 0.8;
-            margin-bottom: 30px;
+            max-width: 280px;
+            margin-bottom: 40px;
         }
 
-        /* Кнопка теж підлаштовується під колір кнопок у Телеграмі */
-        button {
+        /* Велика ігрова кнопка PLAY */
+        .play-btn {
             background-color: var(--tg-theme-button-color, #2481cc);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 12px;
+            width: 150px;
+            height: 150px;
+            font-size: 24px;
+            border-radius: 50%; /* Робимо її круглою */
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             transition: transform 0.1s ease;
         }
 
-        button:active {
-            transform: scale(0.95); /* Ефект натискання */
+        .play-btn:active {
+            transform: scale(0.9); /* Анімація стискання при натисканні */
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>привіт, <span id="username">Друже</span>! 👋</h1>
-        <p>Мій перший міні-додаток, створений на телефоні.</p>
-        
-        <button id="main-btn">Натисни мене!</button>
+    <h2 id="welcome-text">Welcome! 👋</h2>
+    
+    <div class="score-box">
+        Points: <span id="score">0</span>
     </div>
 
+    <p>Tap PLAY to get points and unlock cool rewards!</p>
+    
+    <button class="play-btn" id="play-button">PLAY</button>
+
     <script>
-        // Ініціалізуємо Телеграм всередині нашого сайту
         const tg = window.Telegram.WebApp;
-        
-        // Кажемо Телеграму, що сайт завантажився і можна показувати додаток
         tg.ready();
-        
-        // Розгортаємо вікно додатка на максимум вгору
         tg.expand();
 
-        // Перевіряємо, чи зайшов користувач саме з Телеграма
+        // Підставляємо ім'я з Телеграм
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            // Замінюємо слово "Друже" на реальне ім'я з Телеграм-профілю
-            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+            document.getElementById('welcome-text').innerText = `Welcome, ${tg.initDataUnsafe.user.first_name}! 👋`;
         }
 
-        // Знаходимо нашу кнопку в коді
-        const button = document.getElementById('main-btn');
+        let score = 0;
+        const scoreDisplay = document.getElementById('score');
+        const playButton = document.getElementById('play-button');
 
-        // Додаємо дію при натисканні на кнопку
-        button.addEventListener('click', () => {
-            // 1. Вібрація телефона (якщо телефон це підтримує)
+        // Список крутих призів, які можна випадково виграти
+        const prizes = [
+            "🔥 Secret Promo Code",
+            "💎 +100 Bonus Coins",
+            "🎁 Premium Sticker Pack",
+            "⚡ Double Multiplier x2"
+        ];
+
+        playButton.addEventListener('click', () => {
+            // Додаємо +1 бал при кожному кліку
+            score++;
+            scoreDisplay.innerText = score;
+
+            // Робимо легку вібрацію при кожному кліку
             if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
+                tg.HapticFeedback.impactOccurred('light');
             }
-            
-            // 2. Спливаюче віконце Телеграму з повідомленням
-            tg.showAlert('Привіт! Все працює ідеально! 🚀');
+
+            // Коли користувач набиває 10 балів — він "виграє" приз!
+            if (score === 10) {
+                // Вибираємо випадковий приз із нашого списку
+                const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                
+                // Вібруємо сильніше (успіх!)
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+
+                // Показуємо вікно з виграшем через Телеграм
+                tg.showAlert(`🎉 CONGRATULATIONS!\nYou unlocked: ${randomPrize}`);
+                
+                // Скидаємо лічильник, щоб грати заново
+                score = 0;
+                scoreDisplay.innerText = score;
+            }
         });
     </script>
 </body>
