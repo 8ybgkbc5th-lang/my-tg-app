@@ -60,7 +60,7 @@
 <body>
 
     <div class="container">
-        <h1>Привіт, <span id="username">Друже</span>! 👋</h1>
+        <h1>хуй, <span id="username">Друже</span>! 👋</h1>
         <p>Мій перший міні-додаток, створений на телефоні.</p>
         
         <button id="main-btn">Натисни мене!</button>
